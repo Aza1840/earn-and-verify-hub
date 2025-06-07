@@ -1,5 +1,12 @@
 {
   "dependencies": {
-    "@supabase/supabase-js": "^2.50.0"
+    "@supabase/supabase-js": "^2.50.0",
+    "@types/react": "^19.1.6",
+    "@vitejs/plugin-react": "^4.5.1",
+    "lovable-tagger": "^1.1.8",
+    "postcss": "^8.5.4",
+    "react": "^19.1.0",
+    "tailwindcss": "^4.1.8",
+    "typescript": "^5.8.3"
   }
 }
