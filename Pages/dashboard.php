@@ -918,11 +918,47 @@ body.dark-mode h5 {
 
 /* Light mode support */
 body:not(.dark-mode) .neon-cards-grid {
-    background: transparent;
+    background: linear-gradient(135deg, #f0f2f5 0%, #e8eaed 100%);
 }
 
 body:not(.dark-mode) .neon-card {
-    background: linear-gradient(135deg, rgba(15, 15, 30, 0.98) 0%, rgba(20, 20, 40, 0.95) 100%);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 249, 252, 0.95) 100%);
+    box-shadow: 
+        0 4px 20px rgba(0, 0, 0, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+body:not(.dark-mode) .neon-card:hover {
+    box-shadow: 
+        0 8px 30px rgba(0, 0, 0, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+body:not(.dark-mode) .neon-card-value,
+body:not(.dark-mode) .neon-card-value-large {
+    color: #1a1a2e;
+}
+
+body:not(.dark-mode) .neon-card-subtext {
+    color: rgba(30, 30, 50, 0.7);
+}
+
+body:not(.dark-mode) .neon-card-status {
+    color: rgba(30, 30, 50, 0.6);
+}
+
+body:not(.dark-mode) .value-suffix,
+body:not(.dark-mode) .value-suffix-large {
+    color: rgba(30, 30, 50, 0.6);
+}
+
+body:not(.dark-mode) .neon-card-badge {
+    background: rgba(255, 68, 102, 0.1);
+    color: #ff4466;
+}
+
+body:not(.dark-mode) .progress-ring-bg {
+    stroke: rgba(0, 0, 0, 0.1);
 }
 
 .neon-cards-grid {
@@ -1530,6 +1566,46 @@ body:not(.dark-mode) .neon-card {
 .neon-card:hover::before {
     animation: borderGlow 1.5s ease infinite;
 }
+
+/* Deposits History Button */
+.deposits-history-btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: rgba(255, 215, 0, 0.15);
+    border: 1px solid rgba(255, 215, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffd700;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.deposits-history-btn:hover {
+    background: rgba(255, 215, 0, 0.3);
+    color: #ffe44d;
+    transform: scale(1.1);
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+}
+
+.deposits-history-btn i {
+    font-size: 14px;
+}
+
+body:not(.dark-mode) .deposits-history-btn {
+    background: rgba(255, 165, 0, 0.15);
+    border-color: rgba(255, 165, 0, 0.5);
+    color: #ff8c00;
+}
+
+body:not(.dark-mode) .deposits-history-btn:hover {
+    background: rgba(255, 165, 0, 0.25);
+    color: #ff9500;
+}
 </style>
 
 <body>
@@ -1754,15 +1830,18 @@ document.addEventListener('DOMContentLoaded', function () {
                 <!-- Deposits Card (Gold/Amber theme) -->
                 <div class="neon-card neon-card-gold">
                     <div class="neon-card-glow"></div>
-                    <div class="neon-card-content">
+                    <div class="neon-card-content" style="position: relative;">
                         <div class="neon-card-icon-ring gold-ring">
                             <i class="fas fa-coins"></i>
                         </div>
                         <div class="neon-card-text">
+                            <span class="neon-card-label">TOTAL APPROVED</span>
                             <span class="neon-card-label">DEPOSITS</span>
                             <span class="neon-card-value"><?php echo number_format((float)$total_deposits, 2); ?> <span class="value-suffix">USDT</span></span>
-                            <span class="neon-card-status gold-status">Status: Active</span>
                         </div>
+                        <a href="/deposits" class="deposits-history-btn" title="View Deposit History">
+                            <i class="fas fa-history"></i>
+                        </a>
                     </div>
                     <a href="/deposit" class="neon-card-btn gold-btn"><i class="fas fa-wallet"></i> Add Funds</a>
                 </div>
