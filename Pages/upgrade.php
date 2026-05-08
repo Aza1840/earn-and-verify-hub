@@ -289,17 +289,40 @@ if ($is_premium && !$upgrade_success) {
                             </div>
                             <div class="row g-3">
                                 <?php foreach ($plans as $key => $plan): ?>
+                                    <?php
+                                        $monthly = $base_daily_earning * $plan['multiplier'] * 30;
+                                        $daily   = $base_daily_earning * $plan['multiplier'];
+                                        $isSel   = $key === $selected_plan_key;
+                                    ?>
                                     <div class="col-6 col-md-4">
                                         <a href="?plan=<?php echo $key; ?>" class="text-decoration-none">
-                                            <div class="card h-100 plan-card <?php echo $key === $selected_plan_key ? 'border-primary shadow' : 'border-light'; ?>"
-                                                 style="border-radius: 15px; border-width: 2px; cursor: pointer; transition: all 0.2s;">
+                                            <div class="card h-100 plan-card <?php echo $isSel ? 'plan-selected' : ''; ?>"
+                                                 style="border-radius: 18px; border: 2px solid <?php echo $isSel ? $plan['color'] : 'rgba(0,0,0,0.06)'; ?>; cursor: pointer; transition: transform .2s, box-shadow .2s; overflow: hidden; <?php echo $isSel ? 'box-shadow: 0 12px 30px -10px '.$plan['color'].'80;' : ''; ?>">
+                                                <div style="background: <?php echo $plan['gradient']; ?>; height: 6px;"></div>
                                                 <div class="card-body text-center p-3">
-                                                    <i class="<?php echo $plan['icon']; ?> fa-2x mb-2" style="color: <?php echo $plan['color']; ?>;"></i>
-                                                    <h6 class="fw-bold mb-1" style="color: #222;"><?php echo $plan['name']; ?></h6>
-                                                    <div class="fw-bold" style="color: <?php echo $plan['color']; ?>; font-size: 1.25rem;">
+                                                    <div class="mx-auto mb-2 d-flex align-items-center justify-content-center"
+                                                         style="width:54px;height:54px;border-radius:50%;background: <?php echo $plan['gradient']; ?>;">
+                                                        <i class="<?php echo $plan['icon']; ?> fa-lg" style="color:#fff;"></i>
+                                                    </div>
+                                                    <h6 class="fw-bold mb-1" style="color:#222;"><?php echo $plan['name']; ?></h6>
+                                                    <div class="fw-bold" style="color: <?php echo $plan['color']; ?>; font-size: 1.15rem;">
                                                         $<?php echo number_format($plan['price'], 0); ?>
                                                     </div>
-                                                    <?php if ($key === $selected_plan_key): ?>
+                                                    <span class="badge mt-1 mb-2" style="background: <?php echo $plan['gradient']; ?>; color:#fff; font-size:.75rem;">
+                                                        <i class="fas fa-rocket me-1"></i><?php echo $plan['multiplier']; ?>x Earnings
+                                                    </span>
+                                                    <div class="earning-calc mt-2 p-2" style="background: rgba(0,0,0,0.04); border-radius: 12px;">
+                                                        <div style="font-size:.65rem; color:#6b7280; text-transform:uppercase; letter-spacing:.5px;">
+                                                            <i class="far fa-calendar-alt me-1"></i>30-Day Earnings
+                                                        </div>
+                                                        <div class="fw-bold" style="color: <?php echo $plan['color']; ?>; font-size: 1.05rem;">
+                                                            $<?php echo number_format($monthly, 0); ?>
+                                                        </div>
+                                                        <div style="font-size:.65rem; color:#6b7280;">
+                                                            ~$<?php echo number_format($daily, 2); ?>/day
+                                                        </div>
+                                                    </div>
+                                                    <?php if ($isSel): ?>
                                                         <span class="badge bg-primary mt-2"><i class="fas fa-check"></i> Selected</span>
                                                     <?php endif; ?>
                                                 </div>
@@ -308,6 +331,9 @@ if ($is_premium && !$upgrade_success) {
                                     </div>
                                 <?php endforeach; ?>
                             </div>
+                            <style>
+                                .plan-card:hover { transform: translateY(-4px); box-shadow: 0 14px 30px -12px rgba(0,0,0,0.2); }
+                            </style>
                         </div>
                     </div>
 
