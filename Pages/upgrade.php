@@ -27,13 +27,16 @@ $is_premium = intval($is_premium);
 $deposited_balance = floatval($deposited_balance);
 
 // Available subscription plans
+// `multiplier` boosts the user's standard earnings.
+// 30-day projection assumes a base daily earning of $1 for a standard (un-upgraded) user.
+$base_daily_earning = 1.00;
 $plans = [
-    'silver'   => ['name' => 'Silver Edge',    'price' => 20.00,   'icon' => 'fas fa-shield-alt',  'color' => '#9ca3af'],
-    'gold'     => ['name' => 'Gold Surge',     'price' => 50.00,   'icon' => 'fas fa-bolt',        'color' => '#f59e0b'],
-    'platinum' => ['name' => 'Platinum Core',  'price' => 100.00,  'icon' => 'fas fa-gem',         'color' => '#06b6d4'],
-    'diamond'  => ['name' => 'Diamond Flow',   'price' => 200.00,  'icon' => 'fas fa-diamond',     'color' => '#3b82f6'],
-    'titan'    => ['name' => 'Titan Vault',    'price' => 500.00,  'icon' => 'fas fa-fort-awesome','color' => '#8b5cf6'],
-    'apex'     => ['name' => 'Apex Elite',     'price' => 1000.00, 'icon' => 'fas fa-crown',       'color' => '#ef4444'],
+    'silver'   => ['name' => 'Silver Edge',    'price' => 20.00,   'multiplier' => 4,   'icon' => 'fas fa-shield-alt',  'color' => '#9ca3af', 'gradient' => 'linear-gradient(135deg,#d1d5db,#6b7280)'],
+    'gold'     => ['name' => 'Gold Surge',     'price' => 50.00,   'multiplier' => 10,  'icon' => 'fas fa-bolt',        'color' => '#f59e0b', 'gradient' => 'linear-gradient(135deg,#fde68a,#d97706)'],
+    'platinum' => ['name' => 'Platinum Core',  'price' => 100.00,  'multiplier' => 20,  'icon' => 'fas fa-gem',         'color' => '#06b6d4', 'gradient' => 'linear-gradient(135deg,#a5f3fc,#0891b2)'],
+    'diamond'  => ['name' => 'Diamond Flow',   'price' => 200.00,  'multiplier' => 40,  'icon' => 'fas fa-diamond',     'color' => '#3b82f6', 'gradient' => 'linear-gradient(135deg,#bfdbfe,#1d4ed8)'],
+    'titan'    => ['name' => 'Titan Vault',    'price' => 500.00,  'multiplier' => 100, 'icon' => 'fas fa-fort-awesome','color' => '#8b5cf6', 'gradient' => 'linear-gradient(135deg,#ddd6fe,#6d28d9)'],
+    'apex'     => ['name' => 'Apex Elite',     'price' => 1000.00, 'multiplier' => 200, 'icon' => 'fas fa-crown',       'color' => '#ef4444', 'gradient' => 'linear-gradient(135deg,#fecaca,#b91c1c)'],
 ];
 
 $selected_plan_key = $_POST['plan'] ?? $_GET['plan'] ?? 'silver';
