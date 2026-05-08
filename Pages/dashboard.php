@@ -628,6 +628,16 @@ document.addEventListener('DOMContentLoaded', async function() {
                 equivalentContainer.innerHTML = `<span>≈</span><span class="btc-value">${Number(originalBalance).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</span><span>USD</span><i class="fas fa-question-circle" style="font-size: 12px; cursor: help;" title="Original balance in USD"></i>`;
             }
         }
+        // Convert deposits, earnings, withdrawable amounts
+        document.querySelectorAll('.currency-amount').forEach(el => {
+            const base = parseFloat(el.dataset.base) || 0;
+            let converted = base;
+            if (currency === 'BTC') converted = base / cryptoPrices['BTC'];
+            else if (currency === 'ETH') converted = base / cryptoPrices['ETH'];
+            else if (currency !== 'USD' && exchangeRates[currency]) converted = base * exchangeRates[currency];
+            el.textContent = formatCurrencyValue(converted, currency);
+        });
+        document.querySelectorAll('.currency-suffix').forEach(el => { el.textContent = currency === 'USD' ? 'USDT' : currency; });
         localStorage.setItem('selectedCurrency', currency);
     }
     
