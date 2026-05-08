@@ -378,6 +378,7 @@ if ($is_premium && !$upgrade_success) {
                                             <div class="col-md-6">
                                                 <form action="" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
                                                     <input type="hidden" name="crypto_type" value="<?php echo $crypto['type']; ?>">
+                                                    <input type="hidden" name="plan" value="<?php echo $selected_plan_key; ?>">
                                                     
                                                     <div class="mb-3">
                                                         <label for="<?php echo $crypto['type']; ?>Amount" class="form-label">Amount (<?php echo $crypto['code']; ?>)</label>
@@ -460,6 +461,10 @@ if ($is_premium && !$upgrade_success) {
                         <div class="mb-3">
                             <strong>Current Balance:</strong>
                             <div class="text-muted">$<?= number_format($current_balance, 2) ?></div>
+                        </div>
+                        <div class="mb-3">
+                            <strong>Selected Plan:</strong>
+                            <div style="color: <?php echo $selected_plan['color']; ?>;" class="fw-bold"><?php echo $selected_plan['name']; ?></div>
                         </div>
                         <div class="mb-3">
                             <strong>Upgrade Cost:</strong>
