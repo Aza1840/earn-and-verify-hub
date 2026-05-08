@@ -25,7 +25,23 @@ $stmt->close();
 $current_balance = floatval($balance);
 $is_premium = intval($is_premium);
 $deposited_balance = floatval($deposited_balance);
-$upgrade_cost = 10.00;
+
+// Available subscription plans
+$plans = [
+    'silver'   => ['name' => 'Silver Edge',    'price' => 20.00,   'icon' => 'fas fa-shield-alt',  'color' => '#9ca3af'],
+    'gold'     => ['name' => 'Gold Surge',     'price' => 50.00,   'icon' => 'fas fa-bolt',        'color' => '#f59e0b'],
+    'platinum' => ['name' => 'Platinum Core',  'price' => 100.00,  'icon' => 'fas fa-gem',         'color' => '#06b6d4'],
+    'diamond'  => ['name' => 'Diamond Flow',   'price' => 200.00,  'icon' => 'fas fa-diamond',     'color' => '#3b82f6'],
+    'titan'    => ['name' => 'Titan Vault',    'price' => 500.00,  'icon' => 'fas fa-fort-awesome','color' => '#8b5cf6'],
+    'apex'     => ['name' => 'Apex Elite',     'price' => 1000.00, 'icon' => 'fas fa-crown',       'color' => '#ef4444'],
+];
+
+$selected_plan_key = $_POST['plan'] ?? $_GET['plan'] ?? 'silver';
+if (!isset($plans[$selected_plan_key])) {
+    $selected_plan_key = 'silver';
+}
+$selected_plan = $plans[$selected_plan_key];
+$upgrade_cost = $selected_plan['price'];
 
 // Check for pending upgrade deposits
 $pending_upgrade_stmt = $conn->prepare("SELECT id, amount, crypto_type, created_at FROM deposits WHERE user_id = ? AND upgrade_request = 1 AND status = 'pending' ORDER BY created_at DESC LIMIT 1");
@@ -164,7 +180,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['crypto_type'], $_POST
                         $deposit_id = $conn->insert_id;
                         
                         // Insert pending transaction record
-                        $details = "Upgrade deposit request of $amount $crypto_type";
+                        $details = "Upgrade deposit request of $amount $crypto_type for {$selected_plan['name']} plan";
                         $txn_stmt = $conn->prepare("INSERT INTO transactions (user_id, amount, type, source, details, status, created_at) VALUES (?, ?, 'deposit', 'upgrade', ?, 'pending', NOW())");
                         if ($txn_stmt) {
                             $txn_stmt->bind_param("ids", $user_id, $amount, $details);
@@ -176,7 +192,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['crypto_type'], $_POST
                         EmailNotifications::notifyUserUpgradeRequest($user_email, $current_username, $amount, $crypto_type);
                         EmailNotifications::notifyAdminUserUpgradeRequest($user_email, $current_username, $amount, $crypto_type);
                         
-                        $success = "Upgrade deposit request submitted successfully. You will be upgraded to Premium after admin approval.";
+                        $success = "Upgrade deposit request for {$selected_plan['name']} (\${$selected_plan['price']}) submitted successfully. You will be upgraded after admin approval.";
                         
                         // Refresh pending upgrade status
                         $pending_upgrade_stmt = $conn->prepare("SELECT id, amount, crypto_type, created_at FROM deposits WHERE user_id = ? AND upgrade_request = 1 AND status = 'pending' ORDER BY created_at DESC LIMIT 1");
@@ -262,12 +278,42 @@ if ($is_premium && !$upgrade_success) {
                         </div>
                     </div>
                 <?php else: ?>
+                    <div class="card shadow-sm mb-4" style="border-radius: 20px;">
+                        <div class="card-body">
+                            <div class="text-center mb-4">
+                                <h3 class="fw-bold mb-2">Choose Your Plan</h3>
+                                <p class="text-muted">Select a subscription plan that fits your goals</p>
+                            </div>
+                            <div class="row g-3">
+                                <?php foreach ($plans as $key => $plan): ?>
+                                    <div class="col-6 col-md-4">
+                                        <a href="?plan=<?php echo $key; ?>" class="text-decoration-none">
+                                            <div class="card h-100 plan-card <?php echo $key === $selected_plan_key ? 'border-primary shadow' : 'border-light'; ?>"
+                                                 style="border-radius: 15px; border-width: 2px; cursor: pointer; transition: all 0.2s;">
+                                                <div class="card-body text-center p-3">
+                                                    <i class="<?php echo $plan['icon']; ?> fa-2x mb-2" style="color: <?php echo $plan['color']; ?>;"></i>
+                                                    <h6 class="fw-bold mb-1" style="color: #222;"><?php echo $plan['name']; ?></h6>
+                                                    <div class="fw-bold" style="color: <?php echo $plan['color']; ?>; font-size: 1.25rem;">
+                                                        $<?php echo number_format($plan['price'], 0); ?>
+                                                    </div>
+                                                    <?php if ($key === $selected_plan_key): ?>
+                                                        <span class="badge bg-primary mt-2"><i class="fas fa-check"></i> Selected</span>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="card shadow-sm" style="border-radius: 20px;">
                         <div class="card-body">
                             <div class="text-center mb-4">
                                 <img src="assets/images/crown.png" alt="Crown" style="width: 50px; margin-bottom: 15px;">
-                                <h2 class="fw-bold mb-2">Upgrade to Premium</h2>
-                                <p class="mb-4 text-muted">Deposit $<?= number_format($upgrade_cost, 2) ?> in cryptocurrency to upgrade</p>
+                                <h2 class="fw-bold mb-2">Upgrade to <?php echo $selected_plan['name']; ?></h2>
+                                <p class="mb-4 text-muted">Deposit $<?= number_format($upgrade_cost, 2) ?> in cryptocurrency to activate the <?php echo $selected_plan['name']; ?> plan</p>
                             </div>
 
                             <ul class="nav nav-pills mb-4" id="depositTabs" role="tablist">
@@ -332,6 +378,7 @@ if ($is_premium && !$upgrade_success) {
                                             <div class="col-md-6">
                                                 <form action="" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
                                                     <input type="hidden" name="crypto_type" value="<?php echo $crypto['type']; ?>">
+                                                    <input type="hidden" name="plan" value="<?php echo $selected_plan_key; ?>">
                                                     
                                                     <div class="mb-3">
                                                         <label for="<?php echo $crypto['type']; ?>Amount" class="form-label">Amount (<?php echo $crypto['code']; ?>)</label>
@@ -414,6 +461,10 @@ if ($is_premium && !$upgrade_success) {
                         <div class="mb-3">
                             <strong>Current Balance:</strong>
                             <div class="text-muted">$<?= number_format($current_balance, 2) ?></div>
+                        </div>
+                        <div class="mb-3">
+                            <strong>Selected Plan:</strong>
+                            <div style="color: <?php echo $selected_plan['color']; ?>;" class="fw-bold"><?php echo $selected_plan['name']; ?></div>
                         </div>
                         <div class="mb-3">
                             <strong>Upgrade Cost:</strong>
