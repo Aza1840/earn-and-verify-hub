@@ -278,12 +278,42 @@ if ($is_premium && !$upgrade_success) {
                         </div>
                     </div>
                 <?php else: ?>
+                    <div class="card shadow-sm mb-4" style="border-radius: 20px;">
+                        <div class="card-body">
+                            <div class="text-center mb-4">
+                                <h3 class="fw-bold mb-2">Choose Your Plan</h3>
+                                <p class="text-muted">Select a subscription plan that fits your goals</p>
+                            </div>
+                            <div class="row g-3">
+                                <?php foreach ($plans as $key => $plan): ?>
+                                    <div class="col-6 col-md-4">
+                                        <a href="?plan=<?php echo $key; ?>" class="text-decoration-none">
+                                            <div class="card h-100 plan-card <?php echo $key === $selected_plan_key ? 'border-primary shadow' : 'border-light'; ?>"
+                                                 style="border-radius: 15px; border-width: 2px; cursor: pointer; transition: all 0.2s;">
+                                                <div class="card-body text-center p-3">
+                                                    <i class="<?php echo $plan['icon']; ?> fa-2x mb-2" style="color: <?php echo $plan['color']; ?>;"></i>
+                                                    <h6 class="fw-bold mb-1" style="color: #222;"><?php echo $plan['name']; ?></h6>
+                                                    <div class="fw-bold" style="color: <?php echo $plan['color']; ?>; font-size: 1.25rem;">
+                                                        $<?php echo number_format($plan['price'], 0); ?>
+                                                    </div>
+                                                    <?php if ($key === $selected_plan_key): ?>
+                                                        <span class="badge bg-primary mt-2"><i class="fas fa-check"></i> Selected</span>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="card shadow-sm" style="border-radius: 20px;">
                         <div class="card-body">
                             <div class="text-center mb-4">
                                 <img src="assets/images/crown.png" alt="Crown" style="width: 50px; margin-bottom: 15px;">
-                                <h2 class="fw-bold mb-2">Upgrade to Premium</h2>
-                                <p class="mb-4 text-muted">Deposit $<?= number_format($upgrade_cost, 2) ?> in cryptocurrency to upgrade</p>
+                                <h2 class="fw-bold mb-2">Upgrade to <?php echo $selected_plan['name']; ?></h2>
+                                <p class="mb-4 text-muted">Deposit $<?= number_format($upgrade_cost, 2) ?> in cryptocurrency to activate the <?php echo $selected_plan['name']; ?> plan</p>
                             </div>
 
                             <ul class="nav nav-pills mb-4" id="depositTabs" role="tablist">
