@@ -224,7 +224,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         <div class="neon-card-icon-ring gold-ring"><i class="fas fa-coins"></i></div>
                         <div class="neon-card-text">
                             <span class="neon-card-label">DEPOSITS</span>
-                            <span class="neon-card-value"><?php echo number_format((float)$total_deposits, 2); ?> <span class="value-suffix">USDT</span></span>
+                            <span class="neon-card-value"><span class="currency-amount" data-base="<?php echo (float)$total_deposits; ?>" id="depositsAmount"><?php echo number_format((float)$total_deposits, 2); ?></span> <span class="value-suffix currency-suffix" id="depositsSuffix">USDT</span></span>
                             <span class="neon-card-status gold-status">Status: Active</span>
                         </div>
                     </div>
@@ -240,7 +240,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         <div class="neon-card-icon-ring purple-ring"><i class="fas fa-chart-line"></i></div>
                         <div class="neon-card-text">
                             <span class="neon-card-label">TASK EARNINGS</span>
-                            <span class="neon-card-value"><?php echo number_format((float)$total_earnings, 2); ?> <span class="value-suffix">USDT</span></span>
+                            <span class="neon-card-value"><span class="currency-amount" data-base="<?php echo (float)$total_earnings; ?>" id="earningsAmount"><?php echo number_format((float)$total_earnings, 2); ?></span> <span class="value-suffix currency-suffix" id="earningsSuffix">USDT</span></span>
                             <span class="neon-card-subtext purple-subtext">
                                 <i class="fas fa-arrow-up"></i> +<?php echo number_format($todays_pnl, 2); ?> today
                             </span>
@@ -258,8 +258,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     <div class="withdrawable-info">
                         <span class="withdrawable-label">WITHDRAWABLE</span>
                         <div class="withdrawable-amount">
-                            <span class="withdrawable-value"><?php echo number_format((float)$available_for_withdrawal, 2); ?></span>
-                            <span class="withdrawable-currency">USDT</span>
+                            <span class="withdrawable-value currency-amount" data-base="<?php echo (float)$available_for_withdrawal; ?>" id="withdrawableAmount"><?php echo number_format((float)$available_for_withdrawal, 2); ?></span>
+                            <span class="withdrawable-currency currency-suffix" id="withdrawableSuffix">USDT</span>
                         </div>
                         <span class="withdrawable-badge">Ready to withdraw</span>
                     </div>
@@ -432,8 +432,8 @@ document.addEventListener('DOMContentLoaded', function () {
     @media (max-width: 640px) { .tasks-grid { grid-template-columns: 1fr; } .tasks-title { font-size: 18px; } .task-thumbnail-wrapper { height: 120px; } }
     
 .create-task-btn {
-    background: linear-gradient(135deg, #1f2937, #111827);
-    border: 1px solid rgba(255,255,255,0.08);
+    background: linear-gradient(135deg, #1e40af, #1d4ed8);
+    border: 1px solid rgba(255,255,255,0.12);
     color: #ffffff;
     font-size: 11px;
     font-weight: 600;
@@ -441,7 +441,7 @@ document.addEventListener('DOMContentLoaded', function () {
     border-radius: 10px;
     letter-spacing: 0.4px;
     transition: all 0.25s ease;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+    box-shadow: 0 4px 12px rgba(29,78,216,0.25);
     text-decoration: none;
     display: inline-flex;
     align-items: center;
@@ -449,16 +449,30 @@ document.addEventListener('DOMContentLoaded', function () {
 }
 
 .create-task-btn:hover {
-    background: linear-gradient(135deg, #111827, #000000);
+    background: linear-gradient(135deg, #1d4ed8, #1e3a8a);
     color: #ffffff;
     transform: translateY(-1px);
-    box-shadow: 0 6px 18px rgba(0,0,0,0.28);
+    box-shadow: 0 6px 18px rgba(30,58,138,0.35);
 }
 
 .create-task-btn:focus {
     color: #ffffff;
-    box-shadow: 0 0 0 0.2rem rgba(255,255,255,0.08);
+    box-shadow: 0 0 0 0.2rem rgba(59,130,246,0.25);
 }
+
+/* Currency selector button - light/dark mode */
+.currency-selector-btn {
+    background: #ffffff;
+    color: #111827;
+    border: 1px solid rgba(0,0,0,0.12);
+}
+.currency-selector-btn:hover { background: #f3f4f6; }
+body.dark-mode .currency-selector-btn {
+    background: #1f2937;
+    color: #f9fafb;
+    border: 1px solid rgba(255,255,255,0.12);
+}
+body.dark-mode .currency-selector-btn:hover { background: #111827; }
 
 </style>
 
@@ -611,9 +625,19 @@ document.addEventListener('DOMContentLoaded', async function() {
         <span>BTC</span>
         <i class="fas fa-question-circle" style="font-size: 12px; cursor: help;" title="~$${cryptoPrices['BTC'].toLocaleString()} per BTC"></i>`;
             } else {
-                equivalentContainer.innerHTML = `<span>≈</span><span class="btc-value">${originalBalance.toFixed(2)}</span><span>USD</span><i class="fas fa-question-circle" style="font-size: 12px; cursor: help;" title="Original balance in USD"></i>`;
+                equivalentContainer.innerHTML = `<span>≈</span><span class="btc-value">${Number(originalBalance).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</span><span>USD</span><i class="fas fa-question-circle" style="font-size: 12px; cursor: help;" title="Original balance in USD"></i>`;
             }
         }
+        // Convert deposits, earnings, withdrawable amounts
+        document.querySelectorAll('.currency-amount').forEach(el => {
+            const base = parseFloat(el.dataset.base) || 0;
+            let converted = base;
+            if (currency === 'BTC') converted = base / cryptoPrices['BTC'];
+            else if (currency === 'ETH') converted = base / cryptoPrices['ETH'];
+            else if (currency !== 'USD' && exchangeRates[currency]) converted = base * exchangeRates[currency];
+            el.textContent = formatCurrencyValue(converted, currency);
+        });
+        document.querySelectorAll('.currency-suffix').forEach(el => { el.textContent = currency === 'USD' ? 'USDT' : currency; });
         localStorage.setItem('selectedCurrency', currency);
     }
     
