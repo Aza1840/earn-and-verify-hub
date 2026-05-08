@@ -27,13 +27,16 @@ $is_premium = intval($is_premium);
 $deposited_balance = floatval($deposited_balance);
 
 // Available subscription plans
+// `multiplier` boosts the user's standard earnings.
+// 30-day projection assumes a base daily earning of $1 for a standard (un-upgraded) user.
+$base_daily_earning = 1.00;
 $plans = [
-    'silver'   => ['name' => 'Silver Edge',    'price' => 20.00,   'icon' => 'fas fa-shield-alt',  'color' => '#9ca3af'],
-    'gold'     => ['name' => 'Gold Surge',     'price' => 50.00,   'icon' => 'fas fa-bolt',        'color' => '#f59e0b'],
-    'platinum' => ['name' => 'Platinum Core',  'price' => 100.00,  'icon' => 'fas fa-gem',         'color' => '#06b6d4'],
-    'diamond'  => ['name' => 'Diamond Flow',   'price' => 200.00,  'icon' => 'fas fa-diamond',     'color' => '#3b82f6'],
-    'titan'    => ['name' => 'Titan Vault',    'price' => 500.00,  'icon' => 'fas fa-fort-awesome','color' => '#8b5cf6'],
-    'apex'     => ['name' => 'Apex Elite',     'price' => 1000.00, 'icon' => 'fas fa-crown',       'color' => '#ef4444'],
+    'silver'   => ['name' => 'Silver Edge',    'price' => 20.00,   'multiplier' => 4,   'icon' => 'fas fa-shield-alt',  'color' => '#9ca3af', 'gradient' => 'linear-gradient(135deg,#d1d5db,#6b7280)'],
+    'gold'     => ['name' => 'Gold Surge',     'price' => 50.00,   'multiplier' => 10,  'icon' => 'fas fa-bolt',        'color' => '#f59e0b', 'gradient' => 'linear-gradient(135deg,#fde68a,#d97706)'],
+    'platinum' => ['name' => 'Platinum Core',  'price' => 100.00,  'multiplier' => 20,  'icon' => 'fas fa-gem',         'color' => '#06b6d4', 'gradient' => 'linear-gradient(135deg,#a5f3fc,#0891b2)'],
+    'diamond'  => ['name' => 'Diamond Flow',   'price' => 200.00,  'multiplier' => 40,  'icon' => 'fas fa-diamond',     'color' => '#3b82f6', 'gradient' => 'linear-gradient(135deg,#bfdbfe,#1d4ed8)'],
+    'titan'    => ['name' => 'Titan Vault',    'price' => 500.00,  'multiplier' => 100, 'icon' => 'fas fa-fort-awesome','color' => '#8b5cf6', 'gradient' => 'linear-gradient(135deg,#ddd6fe,#6d28d9)'],
+    'apex'     => ['name' => 'Apex Elite',     'price' => 1000.00, 'multiplier' => 200, 'icon' => 'fas fa-crown',       'color' => '#ef4444', 'gradient' => 'linear-gradient(135deg,#fecaca,#b91c1c)'],
 ];
 
 $selected_plan_key = $_POST['plan'] ?? $_GET['plan'] ?? 'silver';
@@ -286,17 +289,40 @@ if ($is_premium && !$upgrade_success) {
                             </div>
                             <div class="row g-3">
                                 <?php foreach ($plans as $key => $plan): ?>
+                                    <?php
+                                        $monthly = $base_daily_earning * $plan['multiplier'] * 30;
+                                        $daily   = $base_daily_earning * $plan['multiplier'];
+                                        $isSel   = $key === $selected_plan_key;
+                                    ?>
                                     <div class="col-6 col-md-4">
                                         <a href="?plan=<?php echo $key; ?>" class="text-decoration-none">
-                                            <div class="card h-100 plan-card <?php echo $key === $selected_plan_key ? 'border-primary shadow' : 'border-light'; ?>"
-                                                 style="border-radius: 15px; border-width: 2px; cursor: pointer; transition: all 0.2s;">
+                                            <div class="card h-100 plan-card <?php echo $isSel ? 'plan-selected' : ''; ?>"
+                                                 style="border-radius: 18px; border: 2px solid <?php echo $isSel ? $plan['color'] : 'rgba(0,0,0,0.06)'; ?>; cursor: pointer; transition: transform .2s, box-shadow .2s; overflow: hidden; <?php echo $isSel ? 'box-shadow: 0 12px 30px -10px '.$plan['color'].'80;' : ''; ?>">
+                                                <div style="background: <?php echo $plan['gradient']; ?>; height: 6px;"></div>
                                                 <div class="card-body text-center p-3">
-                                                    <i class="<?php echo $plan['icon']; ?> fa-2x mb-2" style="color: <?php echo $plan['color']; ?>;"></i>
-                                                    <h6 class="fw-bold mb-1" style="color: #222;"><?php echo $plan['name']; ?></h6>
-                                                    <div class="fw-bold" style="color: <?php echo $plan['color']; ?>; font-size: 1.25rem;">
+                                                    <div class="mx-auto mb-2 d-flex align-items-center justify-content-center"
+                                                         style="width:54px;height:54px;border-radius:50%;background: <?php echo $plan['gradient']; ?>;">
+                                                        <i class="<?php echo $plan['icon']; ?> fa-lg" style="color:#fff;"></i>
+                                                    </div>
+                                                    <h6 class="fw-bold mb-1" style="color:#222;"><?php echo $plan['name']; ?></h6>
+                                                    <div class="fw-bold" style="color: <?php echo $plan['color']; ?>; font-size: 1.15rem;">
                                                         $<?php echo number_format($plan['price'], 0); ?>
                                                     </div>
-                                                    <?php if ($key === $selected_plan_key): ?>
+                                                    <span class="badge mt-1 mb-2" style="background: <?php echo $plan['gradient']; ?>; color:#fff; font-size:.75rem;">
+                                                        <i class="fas fa-rocket me-1"></i><?php echo $plan['multiplier']; ?>x Earnings
+                                                    </span>
+                                                    <div class="earning-calc mt-2 p-2" style="background: rgba(0,0,0,0.04); border-radius: 12px;">
+                                                        <div style="font-size:.65rem; color:#6b7280; text-transform:uppercase; letter-spacing:.5px;">
+                                                            <i class="far fa-calendar-alt me-1"></i>30-Day Earnings
+                                                        </div>
+                                                        <div class="fw-bold" style="color: <?php echo $plan['color']; ?>; font-size: 1.05rem;">
+                                                            $<?php echo number_format($monthly, 0); ?>
+                                                        </div>
+                                                        <div style="font-size:.65rem; color:#6b7280;">
+                                                            ~$<?php echo number_format($daily, 2); ?>/day
+                                                        </div>
+                                                    </div>
+                                                    <?php if ($isSel): ?>
                                                         <span class="badge bg-primary mt-2"><i class="fas fa-check"></i> Selected</span>
                                                     <?php endif; ?>
                                                 </div>
@@ -305,6 +331,9 @@ if ($is_premium && !$upgrade_success) {
                                     </div>
                                 <?php endforeach; ?>
                             </div>
+                            <style>
+                                .plan-card:hover { transform: translateY(-4px); box-shadow: 0 14px 30px -12px rgba(0,0,0,0.2); }
+                            </style>
                         </div>
                     </div>
 
