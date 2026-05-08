@@ -180,7 +180,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['crypto_type'], $_POST
                         $deposit_id = $conn->insert_id;
                         
                         // Insert pending transaction record
-                        $details = "Upgrade deposit request of $amount $crypto_type";
+                        $details = "Upgrade deposit request of $amount $crypto_type for {$selected_plan['name']} plan";
                         $txn_stmt = $conn->prepare("INSERT INTO transactions (user_id, amount, type, source, details, status, created_at) VALUES (?, ?, 'deposit', 'upgrade', ?, 'pending', NOW())");
                         if ($txn_stmt) {
                             $txn_stmt->bind_param("ids", $user_id, $amount, $details);
@@ -192,7 +192,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['crypto_type'], $_POST
                         EmailNotifications::notifyUserUpgradeRequest($user_email, $current_username, $amount, $crypto_type);
                         EmailNotifications::notifyAdminUserUpgradeRequest($user_email, $current_username, $amount, $crypto_type);
                         
-                        $success = "Upgrade deposit request submitted successfully. You will be upgraded to Premium after admin approval.";
+                        $success = "Upgrade deposit request for {$selected_plan['name']} (\${$selected_plan['price']}) submitted successfully. You will be upgraded after admin approval.";
                         
                         // Refresh pending upgrade status
                         $pending_upgrade_stmt = $conn->prepare("SELECT id, amount, crypto_type, created_at FROM deposits WHERE user_id = ? AND upgrade_request = 1 AND status = 'pending' ORDER BY created_at DESC LIMIT 1");
