@@ -25,7 +25,23 @@ $stmt->close();
 $current_balance = floatval($balance);
 $is_premium = intval($is_premium);
 $deposited_balance = floatval($deposited_balance);
-$upgrade_cost = 10.00;
+
+// Available subscription plans
+$plans = [
+    'silver'   => ['name' => 'Silver Edge',    'price' => 20.00,   'icon' => 'fas fa-shield-alt',  'color' => '#9ca3af'],
+    'gold'     => ['name' => 'Gold Surge',     'price' => 50.00,   'icon' => 'fas fa-bolt',        'color' => '#f59e0b'],
+    'platinum' => ['name' => 'Platinum Core',  'price' => 100.00,  'icon' => 'fas fa-gem',         'color' => '#06b6d4'],
+    'diamond'  => ['name' => 'Diamond Flow',   'price' => 200.00,  'icon' => 'fas fa-diamond',     'color' => '#3b82f6'],
+    'titan'    => ['name' => 'Titan Vault',    'price' => 500.00,  'icon' => 'fas fa-fort-awesome','color' => '#8b5cf6'],
+    'apex'     => ['name' => 'Apex Elite',     'price' => 1000.00, 'icon' => 'fas fa-crown',       'color' => '#ef4444'],
+];
+
+$selected_plan_key = $_POST['plan'] ?? $_GET['plan'] ?? 'silver';
+if (!isset($plans[$selected_plan_key])) {
+    $selected_plan_key = 'silver';
+}
+$selected_plan = $plans[$selected_plan_key];
+$upgrade_cost = $selected_plan['price'];
 
 // Check for pending upgrade deposits
 $pending_upgrade_stmt = $conn->prepare("SELECT id, amount, crypto_type, created_at FROM deposits WHERE user_id = ? AND upgrade_request = 1 AND status = 'pending' ORDER BY created_at DESC LIMIT 1");
